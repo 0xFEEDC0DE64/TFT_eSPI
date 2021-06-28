@@ -6,9 +6,9 @@
   // These are for the new anti-aliased fonts
   void     loadFont(const uint8_t array[]);
 #ifdef FONT_FS_AVAILABLE
-  void     loadFont(String fontName, fs::FS &ffs);
+  void     loadFont(std::string_view fontName, fs::FS &ffs);
 #endif
-  void     loadFont(String fontName, bool flash = true);
+  void     loadFont(std::string_view fontName, bool flash = true);
   void     unloadFont( void );
   bool     getUnicodeIndex(uint16_t unicode, uint16_t *index);
 

@@ -47,7 +47,7 @@ void TFT_eSPI_Button::setLabelDatum(int16_t x_delta, int16_t y_delta, uint8_t da
   _textdatum = datum;
 }
 
-void TFT_eSPI_Button::drawButton(bool inverted, String long_name) {
+void TFT_eSPI_Button::drawButton(bool inverted, std::string_view long_name) {
   uint16_t fill, outline, text;
 
   if(!inverted) {

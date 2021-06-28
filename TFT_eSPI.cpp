@@ -2883,21 +2883,6 @@ int16_t TFT_eSPI::height(void)
 ** Function name:           textWidth
 ** Description:             Return the width in pixels of a string in a given font
 ***************************************************************************************/
-int16_t TFT_eSPI::textWidth(const String& string)
-{
-  int16_t len = string.length() + 2;
-  char buffer[len];
-  string.toCharArray(buffer, len);
-  return textWidth(buffer, textfont);
-}
-
-int16_t TFT_eSPI::textWidth(const String& string, uint8_t font)
-{
-  int16_t len = string.length() + 2;
-  char buffer[len];
-  string.toCharArray(buffer, len);
-  return textWidth(buffer, font);
-}
 
 int16_t TFT_eSPI::textWidth(const char *string)
 {
@@ -4892,23 +4877,6 @@ int16_t TFT_eSPI::drawChar(uint16_t uniCode, int32_t x, int32_t y, uint8_t font)
 ** Description :            draw string with padding if it is defined
 ***************************************************************************************/
 // Without font number, uses font set by setTextFont()
-int16_t TFT_eSPI::drawString(const String& string, int32_t poX, int32_t poY)
-{
-  int16_t len = string.length() + 2;
-  char buffer[len];
-  string.toCharArray(buffer, len);
-  return drawString(buffer, poX, poY, textfont);
-}
-// With font number
-int16_t TFT_eSPI::drawString(const String& string, int32_t poX, int32_t poY, uint8_t font)
-{
-  int16_t len = string.length() + 2;
-  char buffer[len];
-  string.toCharArray(buffer, len);
-  return drawString(buffer, poX, poY, font);
-}
-
-// Without font number, uses font set by setTextFont()
 int16_t TFT_eSPI::drawString(const char *string, int32_t poX, int32_t poY)
 {
   return drawString(string, poX, poY, textfont);
@@ -5139,14 +5107,6 @@ return sumX;
 ** Function name:           drawCentreString (deprecated, use setTextDatum())
 ** Descriptions:            draw string centred on dX
 ***************************************************************************************/
-int16_t TFT_eSPI::drawCentreString(const String& string, int32_t dX, int32_t poY, uint8_t font)
-{
-  int16_t len = string.length() + 2;
-  char buffer[len];
-  string.toCharArray(buffer, len);
-  return drawCentreString(buffer, dX, poY, font);
-}
-
 int16_t TFT_eSPI::drawCentreString(const char *string, int32_t dX, int32_t poY, uint8_t font)
 {
   uint8_t tempdatum = textdatum;
@@ -5162,14 +5122,6 @@ int16_t TFT_eSPI::drawCentreString(const char *string, int32_t dX, int32_t poY, 
 ** Function name:           drawRightString (deprecated, use setTextDatum())
 ** Descriptions:            draw string right justified to dX
 ***************************************************************************************/
-int16_t TFT_eSPI::drawRightString(const String& string, int32_t dX, int32_t poY, uint8_t font)
-{
-  int16_t len = string.length() + 2;
-  char buffer[len];
-  string.toCharArray(buffer, len);
-  return drawRightString(buffer, dX, poY, font);
-}
-
 int16_t TFT_eSPI::drawRightString(const char *string, int32_t dX, int32_t poY, uint8_t font)
 {
   uint8_t tempdatum = textdatum;

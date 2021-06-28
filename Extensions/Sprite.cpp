@@ -2607,10 +2607,10 @@ void TFT_eSprite::drawGlyph(uint16_t code)
 ** Function name:           printToSprite
 ** Description:             Write a string to the sprite cursor position
 ***************************************************************************************/
-void TFT_eSprite::printToSprite(String string)
+void TFT_eSprite::printToSprite(std::string_view string)
 {
   if(!fontLoaded) return;
-  printToSprite((char*)string.c_str(), string.length());
+  printToSprite(string.data(), string.size());
 }
 
 
@@ -2618,7 +2618,7 @@ void TFT_eSprite::printToSprite(String string)
 ** Function name:           printToSprite
 ** Description:             Write a string to the sprite cursor position
 ***************************************************************************************/
-void TFT_eSprite::printToSprite(char *cbuffer, uint16_t len) //String string)
+void TFT_eSprite::printToSprite(char *cbuffer, uint16_t len) //std::string_view string)
 {
   if(!fontLoaded) return;
 

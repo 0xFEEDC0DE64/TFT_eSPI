@@ -22,7 +22,7 @@ void TFT_eSPI::loadFont(const uint8_t array[])
 ** Function name:           loadFont
 ** Description:             loads parameters from a font vlw file
 *************************************************************************************x*/
-void TFT_eSPI::loadFont(String fontName, fs::FS &ffs)
+void TFT_eSPI::loadFont(std::string_view fontName, fs::FS &ffs)
 {
   fontFS = ffs;
   loadFont(fontName, false);
@@ -33,7 +33,7 @@ void TFT_eSPI::loadFont(String fontName, fs::FS &ffs)
 ** Function name:           loadFont
 ** Description:             loads parameters from a font vlw file
 *************************************************************************************x*/
-void TFT_eSPI::loadFont(String fontName, bool flash)
+void TFT_eSPI::loadFont(std::string_view fontName, bool flash)
 {
   /*
     The vlw font format does not appear to be documented anywhere, so some reverse
