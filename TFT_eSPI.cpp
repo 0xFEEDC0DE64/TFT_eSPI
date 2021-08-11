@@ -2884,20 +2884,22 @@ int16_t TFT_eSPI::height(void)
 ** Description:             Return the width in pixels of a string in a given font
 ***************************************************************************************/
 
-int16_t TFT_eSPI::textWidth(const char *string)
+int16_t TFT_eSPI::textWidth(std::string_view string)
 {
   return textWidth(string, textfont);
 }
 
-int16_t TFT_eSPI::textWidth(const char *string, uint8_t font)
+int16_t TFT_eSPI::textWidth(std::string_view string, uint8_t font)
 {
   int32_t str_width = 0;
   uint16_t uniCode  = 0;
 
+  auto ptr = std::begin(string);
+
 #ifdef SMOOTH_FONT
   if(fontLoaded) {
-    while (*string) {
-      uniCode = decodeUTF8(*string++);
+    while (*ptr) {
+      uniCode = decodeUTF8(*ptr++);
       if (uniCode) {
         if (uniCode == 0x20) str_width += gFont.spaceWidth;
         else {
@@ -2905,7 +2907,7 @@ int16_t TFT_eSPI::textWidth(const char *string, uint8_t font)
           bool found = getUnicodeIndex(uniCode, &gNum);
           if (found) {
             if(str_width == 0 && gdX[gNum] < 0) str_width -= gdX[gNum];
-            if (*string || isDigits) str_width += gxAdvance[gNum];
+            if (*ptr || isDigits) str_width += gxAdvance[gNum];
             else str_width += (gdX[gNum] + gWidth[gNum]);
           }
           else str_width += gFont.spaceWidth + 1;
@@ -2920,8 +2922,8 @@ int16_t TFT_eSPI::textWidth(const char *string, uint8_t font)
   if (font>1 && font<9) {
     char *widthtable = (char *)pgm_read_dword( &(fontdata[font].widthtbl ) ) - 32; //subtract the 32 outside the loop
 
-    while (*string) {
-      uniCode = *(string++);
+    while (*ptr) {
+      uniCode = *(ptr++);
       if (uniCode > 31 && uniCode < 128)
       str_width += pgm_read_byte( widthtable + uniCode); // Normally we need to subtract 32 from uniCode
       else str_width += pgm_read_byte( widthtable + 32); // Set illegal character = space width
@@ -2932,13 +2934,13 @@ int16_t TFT_eSPI::textWidth(const char *string, uint8_t font)
 
 #ifdef LOAD_GFXFF
     if(gfxFont) { // New font
-      while (*string) {
-        uniCode = decodeUTF8(*string++);
+      while (*ptr) {
+        uniCode = decodeUTF8(*ptr++);
         if ((uniCode >= pgm_read_word(&gfxFont->first)) && (uniCode <= pgm_read_word(&gfxFont->last ))) {
           uniCode -= pgm_read_word(&gfxFont->first);
           GFXglyph *glyph  = &(((GFXglyph *)pgm_read_dword(&gfxFont->glyph))[uniCode]);
           // If this is not the  last character or is a digit then use xAdvance
-          if (*string  || isDigits) str_width += pgm_read_byte(&glyph->xAdvance);
+          if (*ptr  || isDigits) str_width += pgm_read_byte(&glyph->xAdvance);
           // Else use the offset plus width since this can be bigger than xAdvance
           else str_width += ((int8_t)pgm_read_byte(&glyph->xOffset) + pgm_read_byte(&glyph->width));
         }
@@ -2948,7 +2950,7 @@ int16_t TFT_eSPI::textWidth(const char *string, uint8_t font)
 #endif
     {
 #ifdef LOAD_GLCD
-      while (*string++) str_width += 6;
+      while (*ptr++) str_width += 6;
 #endif
     }
   }
@@ -4329,7 +4331,7 @@ uint16_t TFT_eSPI::decodeUTF8(uint8_t c)
 ** Function name:           decodeUTF8
 ** Description:             Line buffer UTF-8 decoder with fall-back to extended ASCII
 *************************************************************************************x*/
-uint16_t TFT_eSPI::decodeUTF8(uint8_t *buf, uint16_t *index, uint16_t remaining)
+uint16_t TFT_eSPI::decodeUTF8(const uint8_t *buf, uint16_t *index, uint16_t remaining)
 {
   uint16_t c = buf[(*index)++];
   //Serial.print("Byte from string = 0x"); Serial.println(c, HEX);
@@ -4877,13 +4879,13 @@ int16_t TFT_eSPI::drawChar(uint16_t uniCode, int32_t x, int32_t y, uint8_t font)
 ** Description :            draw string with padding if it is defined
 ***************************************************************************************/
 // Without font number, uses font set by setTextFont()
-int16_t TFT_eSPI::drawString(const char *string, int32_t poX, int32_t poY)
+int16_t TFT_eSPI::drawString(std::string_view string, int32_t poX, int32_t poY)
 {
   return drawString(string, poX, poY, textfont);
 }
 
 // With font number. Note: font number is over-ridden if a smooth font is loaded
-int16_t TFT_eSPI::drawString(const char *string, int32_t poX, int32_t poY, uint8_t font)
+int16_t TFT_eSPI::drawString(std::string_view string, int32_t poX, int32_t poY, uint8_t font)
 {
   int16_t sumX = 0;
   uint8_t padding = 1, baseline = 0;
@@ -4987,10 +4989,10 @@ int16_t TFT_eSPI::drawString(const char *string, int32_t poX, int32_t poY, uint8
       cheight = (glyph_ab + glyph_bb) * textsize;
       // Get the offset for the first character only to allow for negative offsets
       uint16_t c2 = 0;
-      uint16_t len = strlen(string);
+      uint16_t len = string.size();
       uint16_t n = 0;
 
-      while (n < len && c2 == 0) c2 = decodeUTF8((uint8_t*)string, &n, len - n);
+      while (n < len && c2 == 0) c2 = decodeUTF8((const uint8_t*)std::begin(string), &n, len - n);
 
       if((c2 >= pgm_read_word(&gfxFont->first)) && (c2 <= pgm_read_word(&gfxFont->last) )) {
         c2 -= pgm_read_word(&gfxFont->first);
@@ -5008,7 +5010,7 @@ int16_t TFT_eSPI::drawString(const char *string, int32_t poX, int32_t poY, uint8
     }
 #endif
 
-  uint16_t len = strlen(string);
+  uint16_t len = string.size();
   uint16_t n = 0;
 
 #ifdef SMOOTH_FONT
@@ -5020,7 +5022,7 @@ int16_t TFT_eSPI::drawString(const char *string, int32_t poX, int32_t poY, uint8
     if (padX && !_fillbg) _fillbg = true;
 
     while (n < len) {
-      uint16_t uniCode = decodeUTF8((uint8_t*)string, &n, len - n);
+      uint16_t uniCode = decodeUTF8((uint8_t*)ptr, &n, len - n);
       drawGlyph(uniCode);
     }
     _fillbg = fillbg; // restore state
@@ -5031,7 +5033,7 @@ int16_t TFT_eSPI::drawString(const char *string, int32_t poX, int32_t poY, uint8
 #endif
   {
     while (n < len) {
-      uint16_t uniCode = decodeUTF8((uint8_t*)string, &n, len - n);
+      uint16_t uniCode = decodeUTF8((const uint8_t*)std::begin(string), &n, len - n);
       sumX += drawChar(uniCode, poX+sumX, poY, font);
     }
   }
@@ -5107,7 +5109,7 @@ return sumX;
 ** Function name:           drawCentreString (deprecated, use setTextDatum())
 ** Descriptions:            draw string centred on dX
 ***************************************************************************************/
-int16_t TFT_eSPI::drawCentreString(const char *string, int32_t dX, int32_t poY, uint8_t font)
+int16_t TFT_eSPI::drawCentreString(std::string_view string, int32_t dX, int32_t poY, uint8_t font)
 {
   uint8_t tempdatum = textdatum;
   int32_t sumX = 0;
@@ -5122,7 +5124,7 @@ int16_t TFT_eSPI::drawCentreString(const char *string, int32_t dX, int32_t poY, 
 ** Function name:           drawRightString (deprecated, use setTextDatum())
 ** Descriptions:            draw string right justified to dX
 ***************************************************************************************/
-int16_t TFT_eSPI::drawRightString(const char *string, int32_t dX, int32_t poY, uint8_t font)
+int16_t TFT_eSPI::drawRightString(std::string_view string, int32_t dX, int32_t poY, uint8_t font)
 {
   uint8_t tempdatum = textdatum;
   int16_t sumX = 0;

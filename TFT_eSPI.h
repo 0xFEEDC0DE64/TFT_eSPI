@@ -563,11 +563,11 @@ class TFT_eSPI { friend class TFT_eSprite; // Sprite class has access to protect
 
            // Handle char arrays
            // Use with setTextDatum() to position string on TFT, and setTextPadding() to blank old displayed strings
-           drawString(const char *string, int32_t x, int32_t y, uint8_t font),  // Draw string using specified font number
-           drawString(const char *string, int32_t x, int32_t y),                // Draw string using current font
+           drawString(std::string_view string, int32_t x, int32_t y, uint8_t font),  // Draw string using specifed font number
+           drawString(std::string_view string, int32_t x, int32_t y),                // Draw string using current font
 
-           drawCentreString(const char *string, int32_t x, int32_t y, uint8_t font),  // Deprecated, use setTextDatum() and drawString()
-           drawRightString(const char *string, int32_t x, int32_t y, uint8_t font);   // Deprecated, use setTextDatum() and drawString()
+           drawCentreString(std::string_view string, int32_t x, int32_t y, uint8_t font),  // Deprecated, use setTextDatum() and drawString()
+           drawRightString(std::string_view string, int32_t x, int32_t y, uint8_t font);   // Deprecated, use setTextDatum() and drawString()
 
   // Text rendering and font handling support funtions
   void     setCursor(int16_t x, int16_t y),                 // Set cursor for tft.print()
@@ -596,13 +596,13 @@ class TFT_eSPI { friend class TFT_eSprite; // Sprite class has access to protect
            setTextFont(uint8_t font);                       // Set the font number to use in future
 #endif
 
-  int16_t  textWidth(const char *string, uint8_t font),     // Returns pixel width of string in specified font
-           textWidth(const char *string),                   // Returns pixel width of string in current font
+  int16_t  textWidth(std::string_view string, uint8_t font),     // Returns pixel width of string in specified font
+           textWidth(std::string_view string),                   // Returns pixel width of string in current font
            fontHeight(int16_t font),                        // Returns pixel height of string in specified font
            fontHeight(void);                                // Returns pixel width of string in current font
 
            // Used by library and Smooth font class to extract Unicode point codes from a UTF8 encoded string
-  uint16_t decodeUTF8(uint8_t *buf, uint16_t *index, uint16_t remaining),
+  uint16_t decodeUTF8(const uint8_t *buf, uint16_t *index, uint16_t remaining),
            decodeUTF8(uint8_t c);
 
            // Support function to UTF8 decode and draw characters piped through print stream
