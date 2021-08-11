@@ -38,6 +38,13 @@
   #define SPI_BUSY_CHECK
 #endif
 
+namespace {
+void delay(uint32_t ms)
+{
+    vTaskDelay(ms / portTICK_PERIOD_MS);
+}
+}
+
 // Clipping macro for pushImage
 #define PI_CLIP                                        \
   if (_vpOoB) return;                                  \
@@ -3767,7 +3774,7 @@ void TFT_eSPI::fillSmoothCircle(int32_t x, int32_t y, int32_t r, uint32_t color,
   int32_t r1 = r * r;
   r++;
   int32_t r2 = r * r;
-  
+
   for (int32_t cy = r - 1; cy > 0; cy--)
   {
     int32_t dy2 = (r - cy) * (r - cy);
