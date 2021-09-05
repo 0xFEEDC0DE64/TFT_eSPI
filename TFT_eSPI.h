@@ -262,31 +262,31 @@ const PROGMEM fontinfo fontdata [] = {
 **                         Section 6: Colour enumeration
 ***************************************************************************************/
 // Default color definitions
-constexpr auto TFT_BLACK       = 0x0000;     /*   0,   0,   0 */
-constexpr auto TFT_NAVY        = 0x000F;     /*   0,   0, 128 */
-constexpr auto TFT_DARKGREEN   = 0x03E0;     /*   0, 128,   0 */
-constexpr auto TFT_DARKCYAN    = 0x03EF;     /*   0, 128, 128 */
-constexpr auto TFT_MAROON      = 0x7800;     /* 128,   0,   0 */
-constexpr auto TFT_PURPLE      = 0x780F;     /* 128,   0, 128 */
-constexpr auto TFT_OLIVE       = 0x7BE0;     /* 128, 128,   0 */
-constexpr auto TFT_LIGHTGREY   = 0xD69A;     /* 211, 211, 211 */
-constexpr auto TFT_DARKGREY    = 0x7BEF;     /* 128, 128, 128 */
-constexpr auto TFT_BLUE        = 0x001F;     /*   0,   0, 255 */
-constexpr auto TFT_GREEN       = 0x07E0;     /*   0, 255,   0 */
-constexpr auto TFT_CYAN        = 0x07FF;     /*   0, 255, 255 */
-constexpr auto TFT_RED         = 0xF800;     /* 255,   0,   0 */
-constexpr auto TFT_MAGENTA     = 0xF81F;     /* 255,   0, 255 */
-constexpr auto TFT_YELLOW      = 0xFFE0;     /* 255, 255,   0 */
-constexpr auto TFT_WHITE       = 0xFFFF;     /* 255, 255, 255 */
-constexpr auto TFT_GREY        = 0x5AEB;
-constexpr auto TFT_ORANGE      = 0xFDA0;     /* 255, 180,   0 */
-constexpr auto TFT_GREENYELLOW = 0xB7E0;     /* 180, 255,   0 */
-constexpr auto TFT_PINK        = 0xFE19;     /* 255, 192, 203 */ //Lighter pink, was 0xFC9F
-constexpr auto TFT_BROWN       = 0x9A60;     /* 150,  75,   0 */
-constexpr auto TFT_GOLD        = 0xFEA0;     /* 255, 215,   0 */
-constexpr auto TFT_SILVER      = 0xC618;     /* 192, 192, 192 */
-constexpr auto TFT_SKYBLUE     = 0x867D;     /* 135, 206, 235 */
-constexpr auto TFT_VIOLET      = 0x915C;     /* 180,  46, 226 */
+constexpr uint16_t TFT_BLACK       = 0x0000;     /*   0,   0,   0 */
+constexpr uint16_t TFT_NAVY        = 0x000F;     /*   0,   0, 128 */
+constexpr uint16_t TFT_DARKGREEN   = 0x03E0;     /*   0, 128,   0 */
+constexpr uint16_t TFT_DARKCYAN    = 0x03EF;     /*   0, 128, 128 */
+constexpr uint16_t TFT_MAROON      = 0x7800;     /* 128,   0,   0 */
+constexpr uint16_t TFT_PURPLE      = 0x780F;     /* 128,   0, 128 */
+constexpr uint16_t TFT_OLIVE       = 0x7BE0;     /* 128, 128,   0 */
+constexpr uint16_t TFT_LIGHTGREY   = 0xD69A;     /* 211, 211, 211 */
+constexpr uint16_t TFT_DARKGREY    = 0x7BEF;     /* 128, 128, 128 */
+constexpr uint16_t TFT_BLUE        = 0x001F;     /*   0,   0, 255 */
+constexpr uint16_t TFT_GREEN       = 0x07E0;     /*   0, 255,   0 */
+constexpr uint16_t TFT_CYAN        = 0x07FF;     /*   0, 255, 255 */
+constexpr uint16_t TFT_RED         = 0xF800;     /* 255,   0,   0 */
+constexpr uint16_t TFT_MAGENTA     = 0xF81F;     /* 255,   0, 255 */
+constexpr uint16_t TFT_YELLOW      = 0xFFE0;     /* 255, 255,   0 */
+constexpr uint16_t TFT_WHITE       = 0xFFFF;     /* 255, 255, 255 */
+constexpr uint16_t TFT_GREY        = 0x5AEB;
+constexpr uint16_t TFT_ORANGE      = 0xFDA0;     /* 255, 180,   0 */
+constexpr uint16_t TFT_GREENYELLOW = 0xB7E0;     /* 180, 255,   0 */
+constexpr uint16_t TFT_PINK        = 0xFE19;     /* 255, 192, 203 */ //Lighter pink, was 0xFC9F
+constexpr uint16_t TFT_BROWN       = 0x9A60;     /* 150,  75,   0 */
+constexpr uint16_t TFT_GOLD        = 0xFEA0;     /* 255, 215,   0 */
+constexpr uint16_t TFT_SILVER      = 0xC618;     /* 192, 192, 192 */
+constexpr uint16_t TFT_SKYBLUE     = 0x867D;     /* 135, 206, 235 */
+constexpr uint16_t TFT_VIOLET      = 0x915C;     /* 180,  46, 226 */
 
 // Next is a special 16 bit colour value that encodes to 8 bits
 // and will then decode back to the same 16 bit value.
@@ -398,12 +398,12 @@ class TFT_eSPI { friend class TFT_eSprite; // Sprite class has access to protect
   void     init(uint8_t tc = TAB_COLOUR), begin(uint8_t tc = TAB_COLOUR);
 
   // These are virtual so the TFT_eSprite class can override them with sprite specific functions
-  virtual void     drawPixel(int32_t x, int32_t y, uint32_t color),
-                   drawChar(int32_t x, int32_t y, uint16_t c, uint32_t color, uint32_t bg, uint8_t size),
-                   drawLine(int32_t xs, int32_t ys, int32_t xe, int32_t ye, uint32_t color),
-                   drawFastVLine(int32_t x, int32_t y, int32_t h, uint32_t color),
-                   drawFastHLine(int32_t x, int32_t y, int32_t w, uint32_t color),
-                   fillRect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t color);
+  virtual void     drawPixel(int32_t x, int32_t y, uint16_t color),
+                   drawChar(int32_t x, int32_t y, uint16_t c, uint16_t color, uint16_t bg, uint8_t size),
+                   drawLine(int32_t xs, int32_t ys, int32_t xe, int32_t ye, uint16_t color),
+                   drawFastVLine(int32_t x, int32_t y, int32_t h, uint16_t color),
+                   drawFastHLine(int32_t x, int32_t y, int32_t w, uint16_t color),
+                   fillRect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t color);
 
   virtual int16_t  drawChar(uint16_t uniCode, int32_t x, int32_t y, uint8_t font),
                    drawChar(uint16_t uniCode, int32_t x, int32_t y),
@@ -634,7 +634,7 @@ class TFT_eSPI { friend class TFT_eSprite; // Sprite class has access to protect
 
            // Convert 16 bit colour to/from 24 bit, R+G+B concatenated into LS 24 bits
   uint32_t color16to24(uint16_t color565);
-  uint32_t color24to16(uint32_t color888);
+  uint16_t color24to16(uint32_t color888);
 
            // Alpha blend 2 colours, see generic "alphaBlend_Test" example
            // alpha =   0 = 100% background colour
@@ -722,7 +722,7 @@ class TFT_eSPI { friend class TFT_eSprite; // Sprite class has access to protect
   // Global variables
   static   SPIClass& getSPIinstance(void); // Get SPI class handle
 
-  uint32_t textcolor, textbgcolor;         // Text foreground and background colours
+  uint16_t textcolor, textbgcolor;         // Text foreground and background colours
 
   uint32_t bitmap_fg, bitmap_bg;           // Bitmap foreground (bit=1) and background (bit=0) colours
 

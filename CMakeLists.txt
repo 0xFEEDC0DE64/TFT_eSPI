@@ -10,6 +10,9 @@ set(dependencies
     arduino-esp32
     freertos
     esp_system
+
+    cpputils
+    espcpputils
 )
 
 idf_component_register(
