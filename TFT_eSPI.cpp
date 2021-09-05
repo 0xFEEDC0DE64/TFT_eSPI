@@ -2901,12 +2901,12 @@ int16_t TFT_eSPI::textWidth(std::string_view string, uint8_t font)
   int32_t str_width = 0;
   uint16_t uniCode  = 0;
 
-  auto ptr = std::begin(string);
+  auto iter = std::begin(string);
 
 #ifdef SMOOTH_FONT
   if(fontLoaded) {
-    while (*ptr) {
-      uniCode = decodeUTF8(*ptr++);
+    while (iter != std::end(string)) {
+      uniCode = decodeUTF8(*iter++);
       if (uniCode) {
         if (uniCode == 0x20) str_width += gFont.spaceWidth;
         else {
@@ -2914,7 +2914,7 @@ int16_t TFT_eSPI::textWidth(std::string_view string, uint8_t font)
           bool found = getUnicodeIndex(uniCode, &gNum);
           if (found) {
             if(str_width == 0 && gdX[gNum] < 0) str_width -= gdX[gNum];
-            if (*ptr || isDigits) str_width += gxAdvance[gNum];
+            if (iter != std::end(string) || isDigits) str_width += gxAdvance[gNum];
             else str_width += (gdX[gNum] + gWidth[gNum]);
           }
           else str_width += gFont.spaceWidth + 1;
@@ -2929,8 +2929,8 @@ int16_t TFT_eSPI::textWidth(std::string_view string, uint8_t font)
   if (font>1 && font<9) {
     char *widthtable = (char *)pgm_read_dword( &(fontdata[font].widthtbl ) ) - 32; //subtract the 32 outside the loop
 
-    while (*ptr) {
-      uniCode = *(ptr++);
+    while (iter != std::end(string)) {
+      uniCode = *iter++;
       if (uniCode > 31 && uniCode < 128)
       str_width += pgm_read_byte( widthtable + uniCode); // Normally we need to subtract 32 from uniCode
       else str_width += pgm_read_byte( widthtable + 32); // Set illegal character = space width
@@ -2941,13 +2941,13 @@ int16_t TFT_eSPI::textWidth(std::string_view string, uint8_t font)
 
 #ifdef LOAD_GFXFF
     if(gfxFont) { // New font
-      while (*ptr) {
-        uniCode = decodeUTF8(*ptr++);
+      while (iter != std::end(string)) {
+        uniCode = decodeUTF8(*iter++);
         if ((uniCode >= pgm_read_word(&gfxFont->first)) && (uniCode <= pgm_read_word(&gfxFont->last ))) {
           uniCode -= pgm_read_word(&gfxFont->first);
           GFXglyph *glyph  = &(((GFXglyph *)pgm_read_dword(&gfxFont->glyph))[uniCode]);
           // If this is not the  last character or is a digit then use xAdvance
-          if (*ptr  || isDigits) str_width += pgm_read_byte(&glyph->xAdvance);
+          if (iter != std::end(string) || isDigits) str_width += pgm_read_byte(&glyph->xAdvance);
           // Else use the offset plus width since this can be bigger than xAdvance
           else str_width += ((int8_t)pgm_read_byte(&glyph->xOffset) + pgm_read_byte(&glyph->width));
         }
@@ -2957,7 +2957,7 @@ int16_t TFT_eSPI::textWidth(std::string_view string, uint8_t font)
 #endif
     {
 #ifdef LOAD_GLCD
-      while (*ptr++) str_width += 6;
+      while (iter != std::end(string)) str_width += 6;
 #endif
     }
   }
@@ -5139,108 +5139,6 @@ int16_t TFT_eSPI::drawRightString(std::string_view string, int32_t dX, int32_t p
   sumX = drawString(string, dX, poY, font);
   textdatum = tempdatum;
   return sumX;
-}
-
-
-/***************************************************************************************
-** Function name:           drawNumber
-** Description:             draw a long integer
-***************************************************************************************/
-int16_t TFT_eSPI::drawNumber(long long_num, int32_t poX, int32_t poY)
-{
-  isDigits = true; // Eliminate jiggle in monospaced fonts
-  char str[12];
-  ltoa(long_num, str, 10);
-  return drawString(str, poX, poY, textfont);
-}
-
-int16_t TFT_eSPI::drawNumber(long long_num, int32_t poX, int32_t poY, uint8_t font)
-{
-  isDigits = true; // Eliminate jiggle in monospaced fonts
-  char str[12];
-  ltoa(long_num, str, 10);
-  return drawString(str, poX, poY, font);
-}
-
-
-/***************************************************************************************
-** Function name:           drawFloat
-** Descriptions:            drawFloat, prints 7 non zero digits maximum
-***************************************************************************************/
-// Assemble and print a string, this permits alignment relative to a datum
-// looks complicated but much more compact and actually faster than using print class
-int16_t TFT_eSPI::drawFloat(float floatNumber, uint8_t dp, int32_t poX, int32_t poY)
-{
-  return drawFloat(floatNumber, dp, poX, poY, textfont);
-}
-
-int16_t TFT_eSPI::drawFloat(float floatNumber, uint8_t dp, int32_t poX, int32_t poY, uint8_t font)
-{
-  isDigits = true;
-  char str[14];               // Array to contain decimal string
-  uint8_t ptr = 0;            // Initialise pointer for array
-  int8_t  digits = 1;         // Count the digits to avoid array overflow
-  float rounding = 0.5;       // Round up down delta
-  bool negative = false;
-
-  if (dp > 7) dp = 7; // Limit the size of decimal portion
-
-  // Adjust the rounding value
-  for (uint8_t i = 0; i < dp; ++i) rounding /= 10.0;
-
-  if (floatNumber < -rounding) {   // add sign, avoid adding - sign to 0.0!
-    str[ptr++] = '-'; // Negative number
-    str[ptr] = 0; // Put a null in the array as a precaution
-    digits = 0;   // Set digits to 0 to compensate so pointer value can be used later
-    floatNumber = -floatNumber; // Make positive
-    negative = true;
-  }
-
-  floatNumber += rounding; // Round up or down
-
-  if (dp == 0) {
-    if (negative) floatNumber = -floatNumber;
-    return drawNumber((long)floatNumber, poX, poY, font);
-  }
-
-  // For error put ... in string and return (all TFT_eSPI library fonts contain . character)
-  if (floatNumber >= 2147483647) {
-    strcpy(str, "...");
-    return drawString(str, poX, poY, font);
-  }
-  // No chance of overflow from here on
-
-  // Get integer part
-  uint32_t temp = (uint32_t)floatNumber;
-
-  // Put integer part into array
-  ltoa(temp, str + ptr, 10);
-
-  // Find out where the null is to get the digit count loaded
-  while ((uint8_t)str[ptr] != 0) ptr++; // Move the pointer along
-  digits += ptr;                  // Count the digits
-
-  str[ptr++] = '.'; // Add decimal point
-  str[ptr] = '0';   // Add a dummy zero
-  str[ptr + 1] = 0; // Add a null but don't increment pointer so it can be overwritten
-
-  // Get the decimal portion
-  floatNumber = floatNumber - temp;
-
-  // Get decimal digits one by one and put in array
-  // Limit digit count so we don't get a false sense of resolution
-  uint8_t i = 0;
-  while ((i < dp) && (digits < 9)) { // while (i < dp) for no limit but array size must be increased
-    i++;
-    floatNumber *= 10;       // for the next decimal
-    temp = floatNumber;      // get the decimal
-    ltoa(temp, str + ptr, 10);
-    ptr++; digits++;         // Increment pointer and digits count
-    floatNumber -= temp;     // Remove that digit
-  }
-
-  // Finally we can plot the string and return pixel length
-  return drawString(str, poX, poY, font);
 }
 
 
