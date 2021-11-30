@@ -2489,6 +2489,25 @@ void TFT_eSPI::fillRoundRect(int32_t x, int32_t y, int32_t w, int32_t h, int32_t
   end_tft_write();              // Does nothing if Sprite class uses this function
 }
 
+void TFT_eSPI::drawSunkenRect(int32_t x, int32_t y, int32_t w, int32_t h, uint32_t color0, uint32_t color1, uint32_t color2)
+{
+    //begin_tft_write();          // Sprite class can use this function, avoiding begin_tft_write()
+    inTransaction = true;
+
+    drawFastHLine(x, y, w, color0);
+    drawFastHLine(x, y + h - 1, w, color1);
+    // Avoid drawing corner pixels twice
+    drawFastVLine(x, y+1, h-2, color0);
+    drawFastVLine(x + w - 1, y+1, h-2, color1);
+
+    setWindow(x + 1, y + 1, x + w - 2, y + h - 2);
+
+    pushBlock(color2, (w - 2) * (h - 2));
+
+    inTransaction = false;
+    end_tft_write();              // Does nothing if Sprite class uses this function
+}
+
 
 /***************************************************************************************
 ** Function name:           drawTriangle
@@ -4170,16 +4189,6 @@ void TFT_eSPI::fillRectHGradient(int16_t x, int16_t y, int16_t w, int16_t h, uin
 uint16_t TFT_eSPI::color565(uint8_t r, uint8_t g, uint8_t b)
 {
   return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
-}
-
-
-/***************************************************************************************
-** Function name:           color16to8
-** Description:             convert 16 bit colour to an 8 bit 332 RGB colour value
-***************************************************************************************/
-uint8_t TFT_eSPI::color16to8(uint16_t c)
-{
-  return ((c & 0xE000)>>8) | ((c & 0x0700)>>6) | ((c & 0x0018)>>3);
 }
 
 
