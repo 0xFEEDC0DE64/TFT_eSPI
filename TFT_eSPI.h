@@ -258,6 +258,13 @@ const PROGMEM fontinfo fontdata [] = {
 #define C_BASELINE 10 // Centre character baseline
 #define R_BASELINE 11 // Right character baseline
 
+// Colour conversion
+// Convert 8 bit red, green and blue to 16 bits
+constexpr uint16_t color565(uint8_t red, uint8_t green, uint8_t blue) noexcept
+{
+    return ((red & 0xF8) << 8) | ((green & 0xFC) << 3) | (blue >> 3);
+}
+
 /***************************************************************************************
 **                         Section 6: Colour enumeration
 ***************************************************************************************/
@@ -287,6 +294,7 @@ constexpr uint16_t TFT_GOLD        = 0xFEA0;     /* 255, 215,   0 */
 constexpr uint16_t TFT_SILVER      = 0xC618;     /* 192, 192, 192 */
 constexpr uint16_t TFT_SKYBLUE     = 0x867D;     /* 135, 206, 235 */
 constexpr uint16_t TFT_VIOLET      = 0x915C;     /* 180,  46, 226 */
+constexpr uint16_t TFT_NICEBLUE    = color565(59, 163, 255);
 
 // Next is a special 16 bit colour value that encodes to 8 bits
 // and will then decode back to the same 16 bit value.
@@ -294,7 +302,7 @@ constexpr uint16_t TFT_VIOLET      = 0x915C;     /* 180,  46, 226 */
 #define TFT_TRANSPARENT 0x0120 // This is actually a dark green
 
 // Default palette for 4 bit colour sprites
-static const uint16_t default_4bit_palette[] PROGMEM = {
+constexpr uint16_t default_4bit_palette[] {
   TFT_BLACK,    //  0  ^
   TFT_BROWN,    //  1  |
   TFT_RED,      //  2  |
@@ -624,14 +632,6 @@ class TFT_eSPI { friend class TFT_eSprite; // Sprite class has access to protect
   uint8_t  readcommand8( uint8_t cmd_function, uint8_t index = 0); // read 8 bits from TFT
   uint16_t readcommand16(uint8_t cmd_function, uint8_t index = 0); // read 16 bits from TFT
   uint32_t readcommand32(uint8_t cmd_function, uint8_t index = 0); // read 32 bits from TFT
-
-
-  // Colour conversion
-  // Convert 8 bit red, green and blue to 16 bits
-  static constexpr uint16_t color565(uint8_t red, uint8_t green, uint8_t blue) noexcept
-  {
-      return ((red & 0xF8) << 8) | ((green & 0xFC) << 3) | (blue >> 3);
-  }
 
            // Convert 8 bit colour to 16 bits
   uint16_t color8to16(uint8_t color332);
