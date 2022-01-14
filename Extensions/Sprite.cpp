@@ -2618,7 +2618,7 @@ void TFT_eSprite::printToSprite(std::string_view string)
 ** Function name:           printToSprite
 ** Description:             Write a string to the sprite cursor position
 ***************************************************************************************/
-void TFT_eSprite::printToSprite(char *cbuffer, uint16_t len) //std::string_view string)
+void TFT_eSprite::printToSprite(const char *cbuffer, uint16_t len) //std::string_view string)
 {
   if(!fontLoaded) return;
 
