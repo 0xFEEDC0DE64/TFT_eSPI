@@ -44,6 +44,7 @@
 #include "freertos/task.h"
 #include "wiring_shift.h"
 #include "esp32-hal-gpio.h"
+#include "esp32-hal-misc.h"
 
 namespace {
 void delay(uint32_t ms)
