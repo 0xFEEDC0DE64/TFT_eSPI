@@ -27,7 +27,6 @@
 ***************************************************************************************/
 
 //Standard support
-#include <Arduino.h>
 #include <SPI.h>
 
 #include <string_view>
