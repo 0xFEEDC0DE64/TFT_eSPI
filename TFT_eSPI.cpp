@@ -4188,16 +4188,6 @@ void TFT_eSPI::fillRectHGradient(int16_t x, int16_t y, int16_t w, int16_t h, uin
 
 
 /***************************************************************************************
-** Function name:           color565
-** Description:             convert three 8 bit RGB levels to a 16 bit colour value
-***************************************************************************************/
-uint16_t TFT_eSPI::color565(uint8_t r, uint8_t g, uint8_t b)
-{
-  return ((r & 0xF8) << 8) | ((g & 0xFC) << 3) | (b >> 3);
-}
-
-
-/***************************************************************************************
 ** Function name:           color8to16
 ** Description:             convert 8 bit colour to a 16 bit 565 colour value
 ***************************************************************************************/

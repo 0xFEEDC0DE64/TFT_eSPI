@@ -1,3 +1,5 @@
+#include <algorithm>
+
 /***************************************************************************************
 ** Code for the GFX button UI element
 ** Grabbed from Adafruit_GFX library and enhanced to handle any label font
@@ -60,7 +62,7 @@ void TFT_eSPI_Button::drawButton(bool inverted, std::string_view long_name) {
     text    = _fillcolor;
   }
 
-  uint8_t r = min(_w, _h) / 4; // Corner radius
+  uint8_t r = std::min(_w, _h) / 4; // Corner radius
   _gfx->fillRoundRect(_x1, _y1, _w, _h, r, fill);
   _gfx->drawRoundRect(_x1, _y1, _w, _h, r, outline);
 
@@ -69,7 +71,7 @@ void TFT_eSPI_Button::drawButton(bool inverted, std::string_view long_name) {
                     _y1 + (_h / 4));
     _gfx->setTextColor(text);
     _gfx->setTextSize(_textsize);
-    _gfx->print(_label);
+//    _gfx->print(_label);
   }
   else {
     _gfx->setTextColor(text, fill);

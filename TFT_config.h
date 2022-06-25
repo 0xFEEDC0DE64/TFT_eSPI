@@ -224,7 +224,7 @@
 // SPI BUS
 #else
     #if CONFIG_TFT_MISO == -1
-        #error "Invalid MISO pin. Check TFT_eSPI configuration"
+        //#error "Invalid MISO pin. Check TFT_eSPI configuration"
     #else
         #define TFT_MISO      CONFIG_TFT_MISO
     #endif
