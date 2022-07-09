@@ -78,9 +78,9 @@
     #define TFT_RGB_ORDER TFT_RGB
 #endif
 
-#ifdef CONFIG_TFT_RGB_ORDER
-    #define TFT_RGB_ORDER TFT_BGR
-#endif
+//#ifdef CONFIG_TFT_RGB_ORDER
+//    #define TFT_RGB_ORDER TFT_BGR
+//#endif
 
 #ifdef CONFIG_TFT_M5STACK
     #define M5STACK
