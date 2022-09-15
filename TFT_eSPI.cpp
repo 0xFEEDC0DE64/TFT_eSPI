@@ -46,6 +46,8 @@
 #include "esp32-hal-gpio.h"
 #include "esp32-hal-misc.h"
 
+#include "din1451alt10pt8b.cpp"
+
 namespace {
 void delay(uint32_t ms)
 {
@@ -4901,6 +4903,8 @@ int16_t TFT_eSPI::drawString(std::string_view string, int32_t poX, int32_t poY)
 // With font number. Note: font number is over-ridden if a smooth font is loaded
 int16_t TFT_eSPI::drawString(std::string_view string, int32_t poX, int32_t poY, uint8_t font)
 {
+    if (font == 4)
+        font = 1;
   int16_t sumX = 0;
   uint8_t padding = 1, baseline = 0;
   uint16_t cwidth = textWidth(string, font); // Find the pixel width of the string in the font
@@ -5180,13 +5184,16 @@ void TFT_eSPI::setFreeFont(const GFXfont *f)
   }
 }
 
-
 /***************************************************************************************
 ** Function name:           setTextFont
 ** Description:             Set the font for the print stream
 ***************************************************************************************/
 void TFT_eSPI::setTextFont(uint8_t f)
 {
+    if (f == 4) {
+        setFreeFont(&din1451alt10pt8b);
+        return;
+    }
   textfont = (f > 0) ? f : 1; // Don't allow font 0
   gfxFont = NULL;
 }
