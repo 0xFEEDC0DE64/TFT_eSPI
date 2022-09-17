@@ -24,3 +24,8 @@ idf_component_register(
     REQUIRES
         ${dependencies}
 )
+
+target_compile_options(${COMPONENT_TARGET}
+    PUBLIC
+        -DDISABLE_ALL_LIBRARY_WARNINGS
+)
