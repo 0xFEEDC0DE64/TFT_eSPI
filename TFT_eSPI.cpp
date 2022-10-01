@@ -2969,16 +2969,22 @@ int16_t TFT_eSPI::textWidth(std::string_view string, uint8_t font)
   else {
 
 #ifdef LOAD_GFXFF
-    if(gfxFont) { // New font
-      while (iter != std::end(string)) {
+    if(gfxFont)
+    {
+      // New font
+      while (*iter)
+      {
         uniCode = decodeUTF8(*iter++);
-        if ((uniCode >= pgm_read_word(&gfxFont->first)) && (uniCode <= pgm_read_word(&gfxFont->last ))) {
+        if ((uniCode >= pgm_read_word(&gfxFont->first)) && (uniCode <= pgm_read_word(&gfxFont->last)))
+        {
           uniCode -= pgm_read_word(&gfxFont->first);
           GFXglyph *glyph  = &(((GFXglyph *)pgm_read_dword(&gfxFont->glyph))[uniCode]);
           // If this is not the  last character or is a digit then use xAdvance
-          if (iter != std::end(string) || isDigits) str_width += pgm_read_byte(&glyph->xAdvance);
+          if (iter != std::end(string) || isDigits)
+            str_width += pgm_read_byte(&glyph->xAdvance);
           // Else use the offset plus width since this can be bigger than xAdvance
-          else str_width += ((int8_t)pgm_read_byte(&glyph->xOffset) + pgm_read_byte(&glyph->width));
+          else
+            str_width += ((int8_t)pgm_read_byte(&glyph->xOffset) + pgm_read_byte(&glyph->width));
         }
       }
     }
@@ -2986,7 +2992,7 @@ int16_t TFT_eSPI::textWidth(std::string_view string, uint8_t font)
 #endif
     {
 #ifdef LOAD_GLCD
-      while (iter != std::end(string)) str_width += 6;
+      while (*iter++) str_width += 6;
 #endif
     }
   }
