@@ -46,7 +46,9 @@
 #include "esp32-hal-gpio.h"
 #include "esp32-hal-misc.h"
 
+#ifdef CONFIG_TFT_IS_AUTOBAHN
 #include "din1451alt10pt8b.cpp"
+#endif
 
 namespace {
 void delay(uint32_t ms)
@@ -4909,8 +4911,10 @@ int16_t TFT_eSPI::drawString(std::string_view string, int32_t poX, int32_t poY)
 // With font number. Note: font number is over-ridden if a smooth font is loaded
 int16_t TFT_eSPI::drawString(std::string_view string, int32_t poX, int32_t poY, uint8_t font)
 {
+#ifdef CONFIG_TFT_IS_AUTOBAHN
     if (font == 4)
         font = 1;
+#endif
   int16_t sumX = 0;
   uint8_t padding = 1, baseline = 0;
   uint16_t cwidth = textWidth(string, font); // Find the pixel width of the string in the font
@@ -5196,10 +5200,12 @@ void TFT_eSPI::setFreeFont(const GFXfont *f)
 ***************************************************************************************/
 void TFT_eSPI::setTextFont(uint8_t f)
 {
+#ifdef TFT_IS_AUTOBAHN
     if (f == 4) {
         setFreeFont(&din1451alt10pt8b);
         return;
     }
+#endif
   textfont = (f > 0) ? f : 1; // Don't allow font 0
   gfxFont = NULL;
 }
