@@ -351,6 +351,11 @@ menu "TFT_eSPI"
         config TFT_SMOOTH_FONT
             bool "Smooth Fonts"
             default "y"
+
+        config TFT_IS_AUTOBAHN
+            bool "TFT Use Autobahn font"
+            default "y"
+
     endmenu
     
     menu "Touch screen configuration"
