@@ -46,7 +46,9 @@
 #include "esp32-hal-gpio.h"
 #include "esp32-hal-misc.h"
 
+#ifdef CONFIG_TFT_IS_AUTOBAHN
 #include "din1451alt10pt8b.cpp"
+#endif
 
 namespace {
 void delay(uint32_t ms)
