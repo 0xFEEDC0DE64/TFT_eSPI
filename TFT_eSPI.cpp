@@ -5200,7 +5200,7 @@ void TFT_eSPI::setFreeFont(const GFXfont *f)
 ***************************************************************************************/
 void TFT_eSPI::setTextFont(uint8_t f)
 {
-#ifdef TFT_IS_AUTOBAHN
+#ifdef CONFIG_TFT_IS_AUTOBAHN
     if (f == 4) {
         setFreeFont(&din1451alt10pt8b);
         return;
