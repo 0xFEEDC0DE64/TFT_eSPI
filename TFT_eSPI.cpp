@@ -3020,16 +3020,20 @@ uint16_t TFT_eSPI::fontsLoaded(void)
 ***************************************************************************************/
 int16_t TFT_eSPI::fontHeight(int16_t font)
 {
+#ifdef CONFIG_TFT_IS_AUTOBAHN
+    if (font == 4)
+        font = 1;
+#endif
+
 #ifdef SMOOTH_FONT
   if(fontLoaded) return gFont.yAdvance;
 #endif
 
 #ifdef LOAD_GFXFF
-  if (font==1) {
-    if(gfxFont) { // New font
+  if (font == 1)
+    if (gfxFont) // New font
       return pgm_read_byte(&gfxFont->yAdvance) * textsize;
-    }
-  }
+
 #endif
   return pgm_read_byte( &fontdata[font].height ) * textsize;
 }
