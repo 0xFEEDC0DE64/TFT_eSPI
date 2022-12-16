@@ -2261,8 +2261,15 @@ int16_t TFT_eSPI::height() const
 
 int16_t TFT_eSPI::textWidth(std::string_view string, uint8_t font)
 {
-  int32_t str_width = 1;
+  int32_t str_width = 0;
   uint16_t uniCode  = 0;
+
+#ifdef CONFIG_TFT_IS_AUTOBAHN
+  if (font == 1 || (gfxFont != &din1451alt10pt8b && font == 4))
+  {
+    str_width = 1;
+  }
+#endif
 
   auto iter = std::begin(string);
 
