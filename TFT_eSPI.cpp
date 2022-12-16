@@ -2261,7 +2261,7 @@ int16_t TFT_eSPI::height() const
 
 int16_t TFT_eSPI::textWidth(std::string_view string, uint8_t font)
 {
-  int32_t str_width = 0;
+  int32_t str_width = 1;
   uint16_t uniCode  = 0;
 
   auto iter = std::begin(string);
