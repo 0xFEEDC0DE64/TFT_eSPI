@@ -4397,31 +4397,7 @@ void TFT_eSPI::setFreeFont(const GFXfont *f)
   }
 }
 
-#else
-
-
-/***************************************************************************************
-** Function name:           setFreeFont
-** Descriptions:            Sets the GFX free font to use
-***************************************************************************************/
-
-// Alternative to setTextFont() so we don't need two different named functions
-void TFT_eSPI::setFreeFont(uint8_t font)
-{
-  setTextFont(font);
-}
-
-
-/***************************************************************************************
-** Function name:           setTextFont
-** Description:             Set the font for the print stream
-***************************************************************************************/
-void TFT_eSPI::setTextFont(uint8_t f)
-{
-  textfont = (f > 0) ? f : 1; // Don't allow font 0
-}
 #endif
-
 
 /***************************************************************************************
 ** Function name:           getSPIinstance

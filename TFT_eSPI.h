@@ -566,9 +566,6 @@ class TFT_eSPI {
 
 #ifdef LOAD_GFXFF
   void     setFreeFont(const GFXfont *f = NULL);            // Select the GFX Free Font
-#else
-  void     setFreeFont(uint8_t font),                       // Not used, historical fix to prevent an error
-           setTextFont(uint8_t font);                       // Set the font number to use in future
 #endif
 
   int16_t  textWidth(std::string_view string, uint8_t font);     // Returns pixel width of string in specified font
