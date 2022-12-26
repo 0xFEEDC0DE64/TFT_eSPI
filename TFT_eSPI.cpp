@@ -4104,8 +4104,9 @@ int16_t TFT_eSPI::drawChar(uint16_t uniCode, int32_t x, int32_t y, uint16_t colo
 ***************************************************************************************/
 
 // With font number. Note: font number is over-ridden if a smooth font is loaded
-int16_t TFT_eSPI::drawString(std::string_view string, int32_t poX, int32_t poY, uint16_t color, uint16_t bgcolor, uint8_t font)
+int16_t TFT_eSPI::drawString(std::string_view string, int32_t poX, int32_t poY, uint16_t color, uint16_t bgcolor, uint8_t font, uint8_t datum)
 {
+    textdatum = datum;
 #ifdef CONFIG_TFT_IS_AUTOBAHN
     if (font == 4)
     {
@@ -4331,6 +4332,7 @@ int16_t TFT_eSPI::drawString(std::string_view string, int32_t poX, int32_t poY, 
 #endif
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ DEBUG ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+textdatum = 0;
 return sumX;
 }
 
@@ -4343,8 +4345,7 @@ int16_t TFT_eSPI::drawCentreString(std::string_view string, int32_t dX, int32_t 
 {
   uint8_t tempdatum = textdatum;
   int32_t sumX = 0;
-  textdatum = TC_DATUM;
-  sumX = drawString(string, dX, poY, color, bgcolor, font);
+  sumX = drawString(string, dX, poY, color, bgcolor, font, TC_DATUM);
   textdatum = tempdatum;
   return sumX;
 }
@@ -4358,8 +4359,7 @@ int16_t TFT_eSPI::drawRightString(std::string_view string, int32_t dX, int32_t p
 {
   uint8_t tempdatum = textdatum;
   int16_t sumX = 0;
-  textdatum = TR_DATUM;
-  sumX = drawString(string, dX, poY, color, bgcolor, font);
+  sumX = drawString(string, dX, poY, color, bgcolor, font, TR_DATUM);
   textdatum = tempdatum;
   return sumX;
 }

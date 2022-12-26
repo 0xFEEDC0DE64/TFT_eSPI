@@ -552,7 +552,7 @@ class TFT_eSPI {
 
            // Handle char arrays
            // Use with setTextDatum() to position string on TFT, and setTextPadding() to blank old displayed strings
-   int16_t drawString(std::string_view string, int32_t x, int32_t y, uint16_t color, uint16_t bgcolor, uint8_t font);  // Draw string using specifed font number
+   int16_t drawString(std::string_view string, int32_t x, int32_t y, uint16_t color, uint16_t bgcolor, uint8_t font, uint8_t datum);  // Draw string using specifed font number
    int16_t drawCentreString(std::string_view string, int32_t x, int32_t y, uint16_t color, uint16_t bgcolor, uint8_t font);  // Deprecated, use setTextDatum() and drawString()
    int16_t drawRightString(std::string_view string, int32_t x, int32_t y, uint16_t color, uint16_t bgcolor, uint8_t font);   // Deprecated, use setTextDatum() and drawString()
 
