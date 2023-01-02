@@ -2265,9 +2265,17 @@ int16_t TFT_eSPI::textWidth(std::string_view string, uint8_t font)
   uint16_t uniCode  = 0;
 
 #ifdef CONFIG_TFT_IS_AUTOBAHN
-  if (font == 1 || (gfxFont != &din1451alt10pt8b && font == 4))
+  if (font == 1 || gfxFont != &din1451alt10pt8b || font == 4)
   {
-    str_width = 1;
+      if (font == 4)
+      {
+          if (gfxFont != &din1451alt10pt8b)
+          {
+              setFreeFont(&din1451alt10pt8b);
+          }
+          font = 1;
+      }
+      str_width = 1;
   }
 #endif
 
