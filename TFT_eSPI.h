@@ -32,6 +32,8 @@
 #include <string>
 #include <string_view>
 
+#include "tftinterface.h"
+
 /***************************************************************************************
 **                         Section 2: Load library and processor specific header files
 ***************************************************************************************/
@@ -115,148 +117,6 @@
 #ifndef SPI_BUSY_CHECK
   #define SPI_BUSY_CHECK
 #endif
-
-/***************************************************************************************
-**                         Section 4: Setup fonts
-***************************************************************************************/
-// Use GLCD font in error case where user requests a smooth font file
-// that does not exist (this is a temporary fix to stop ESP32 reboot)
-#ifdef SMOOTH_FONT
-  #ifndef LOAD_GLCD
-    #define LOAD_GLCD
-  #endif
-#endif
-
-// Only load the fonts defined in User_Setup.h (to save space)
-// Set flag so RLE rendering code is optionally compiled
-#ifdef LOAD_GLCD
-  #include <Fonts/glcdfont.c>
-#endif
-
-#ifdef LOAD_FONT2
-  #include <Fonts/Font16.h>
-#endif
-
-#ifdef LOAD_FONT4
-  #include <Fonts/Font32rle.h>
-  #define LOAD_RLE
-#endif
-
-#ifdef LOAD_FONT6
-  #include <Fonts/Font64rle.h>
-  #ifndef LOAD_RLE
-    #define LOAD_RLE
-  #endif
-#endif
-
-#ifdef LOAD_FONT7
-  #include <Fonts/Font7srle.h>
-  #ifndef LOAD_RLE
-    #define LOAD_RLE
-  #endif
-#endif
-
-#ifdef LOAD_FONT8
-  #include <Fonts/Font72rle.h>
-  #ifndef LOAD_RLE
-    #define LOAD_RLE
-  #endif
-#elif defined LOAD_FONT8N // Optional narrower version
-  #define LOAD_FONT8
-  #include <Fonts/Font72x53rle.h>
-  #ifndef LOAD_RLE
-    #define LOAD_RLE
-  #endif
-#endif
-
-#ifdef LOAD_GFXFF
-  // We can include all the free fonts and they will only be built into
-  // the sketch if they are used
-  #include <Fonts/GFXFF/gfxfont.h>
-  // Call up any user custom fonts
-  #include <User_Setups/User_Custom_Fonts.h>
-#endif // #ifdef LOAD_GFXFF
-
-// Create a null default font in case some fonts not used (to prevent crash)
-const  uint8_t widtbl_null[1] = {0};
-PROGMEM const uint8_t chr_null[1] = {0};
-PROGMEM const uint8_t* const chrtbl_null[1] = {chr_null};
-
-// This is a structure to conveniently hold information on the default fonts
-// Stores pointer to font character image address table, width table and height
-typedef struct {
-    const uint8_t *chartbl;
-    const uint8_t *widthtbl;
-    uint8_t height;
-    uint8_t baseline;
-    } fontinfo;
-
-// Now fill the structure
-const PROGMEM fontinfo fontdata [] = {
-  #ifdef LOAD_GLCD
-   { (const uint8_t *)font, widtbl_null, 0, 0 },
-  #else
-   { (const uint8_t *)chrtbl_null, widtbl_null, 0, 0 },
-  #endif
-   // GLCD font (Font 1) does not have all parameters
-   { (const uint8_t *)chrtbl_null, widtbl_null, 8, 7 },
-
-  #ifdef LOAD_FONT2
-   { (const uint8_t *)chrtbl_f16, widtbl_f16, chr_hgt_f16, baseline_f16},
-  #else
-   { (const uint8_t *)chrtbl_null, widtbl_null, 0, 0 },
-  #endif
-
-   // Font 3 current unused
-   { (const uint8_t *)chrtbl_null, widtbl_null, 0, 0 },
-
-  #ifdef LOAD_FONT4
-   { (const uint8_t *)chrtbl_f32, widtbl_f32, chr_hgt_f32, baseline_f32},
-  #else
-   { (const uint8_t *)chrtbl_null, widtbl_null, 0, 0 },
-  #endif
-
-   // Font 5 current unused
-   { (const uint8_t *)chrtbl_null, widtbl_null, 0, 0 },
-
-  #ifdef LOAD_FONT6
-   { (const uint8_t *)chrtbl_f64, widtbl_f64, chr_hgt_f64, baseline_f64},
-  #else
-   { (const uint8_t *)chrtbl_null, widtbl_null, 0, 0 },
-  #endif
-
-  #ifdef LOAD_FONT7
-   { (const uint8_t *)chrtbl_f7s, widtbl_f7s, chr_hgt_f7s, baseline_f7s},
-  #else
-   { (const uint8_t *)chrtbl_null, widtbl_null, 0, 0 },
-  #endif
-
-  #ifdef LOAD_FONT8
-   { (const uint8_t *)chrtbl_f72, widtbl_f72, chr_hgt_f72, baseline_f72}
-  #else
-   { (const uint8_t *)chrtbl_null, widtbl_null, 0, 0 }
-  #endif
-};
-
-/***************************************************************************************
-**                         Section 5: Font datum enumeration
-***************************************************************************************/
-//These enumerate the text plotting alignment (reference datum point)
-#define TL_DATUM 0 // Top left (default)
-#define TC_DATUM 1 // Top centre
-#define TR_DATUM 2 // Top right
-#define ML_DATUM 3 // Middle left
-#define CL_DATUM 3 // Centre left, same as above
-#define MC_DATUM 4 // Middle centre
-#define CC_DATUM 4 // Centre centre, same as above
-#define MR_DATUM 5 // Middle right
-#define CR_DATUM 5 // Centre right, same as above
-#define BL_DATUM 6 // Bottom left
-#define BC_DATUM 7 // Bottom centre
-#define BR_DATUM 8 // Bottom right
-#define L_BASELINE  9 // Left character baseline (Line the 'A' character would sit on)
-#define C_BASELINE 10 // Centre character baseline
-#define R_BASELINE 11 // Right character baseline
 
 // Colour conversion
 // Convert 8 bit red, green and blue to 16 bits
@@ -394,7 +254,7 @@ swap_coord(T& a, T& b) { T t = a; a = b; b = t; }
 typedef uint16_t (*getColorCallback)(uint16_t x, uint16_t y);
 
 // Class functions and variables
-class TFT_eSPI {
+class TFT_eSPI : public espgui::TftInterface {
 
  //--------------------------------------- public ------------------------------------//
  public:
@@ -406,13 +266,11 @@ class TFT_eSPI {
   void     init(uint8_t tc = TAB_COLOUR), begin(uint8_t tc = TAB_COLOUR);
 
   void     drawPixel(int32_t x, int32_t y, uint16_t color);
-  void     drawChar(int32_t x, int32_t y, uint16_t c, uint16_t color, uint16_t bg, uint8_t size);
   void     drawLine(int32_t xs, int32_t ys, int32_t xe, int32_t ye, uint16_t color);
   void     drawFastVLine(int32_t x, int32_t y, int32_t h, uint16_t color);
   void     drawFastHLine(int32_t x, int32_t y, int32_t w, uint16_t color);
   void     fillRect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t color);
 
-  int16_t  drawChar(uint16_t uniCode, int32_t x, int32_t y, uint16_t color, uint16_t bgcolor, uint8_t font);
   int16_t  height() const;
   int16_t  width() const;
 
@@ -427,6 +285,8 @@ class TFT_eSPI {
                    // These are non-inlined to enable override
   virtual void     begin_nin_write();
   virtual void     end_nin_write();
+
+  void     Write_16(uint16_t v);
 
   void     setRotation(uint8_t r); // Set the display image orientation to 0, 1, 2 or 3
   uint8_t  getRotation(void) const;      // Read the current rotation
@@ -545,35 +405,11 @@ class TFT_eSPI {
            // Set w and h to 1 to read 1 pixel's colour. The data buffer must be at least w * h * 3 bytes
   void     readRectRGB(int32_t x, int32_t y, int32_t w, int32_t h, uint8_t *data);
 
-           // Handle char arrays
-           // Use with setTextDatum() to position string on TFT, and setTextPadding() to blank old displayed strings
-   int16_t drawString(std::string_view string, int32_t x, int32_t y, uint16_t color, uint16_t bgcolor, uint8_t font, uint8_t datum);  // Draw string using specifed font number
-   int16_t drawCentreString(std::string_view string, int32_t x, int32_t y, uint16_t color, uint16_t bgcolor, uint8_t font);  // Deprecated, use setTextDatum() and drawString()
-   int16_t drawRightString(std::string_view string, int32_t x, int32_t y, uint16_t color, uint16_t bgcolor, uint8_t font);   // Deprecated, use setTextDatum() and drawString()
 
-  // Text rendering and font handling support funtions
-  void     setTextSize(uint8_t size);                       // Set character size multiplier (this increases pixel size)
 
-  void     setTextWrap(bool wrapX, bool wrapY = false);     // Turn on/off wrapping of text in TFT width and/or height
-
-  void     setTextDatum(uint8_t datum);                     // Set text datum position (default is top left), see Section 6 above
-  uint8_t  getTextDatum(void);
-
-#ifdef LOAD_GFXFF
-  void     setFreeFont(const GFXfont *f = NULL);            // Select the GFX Free Font
-#endif
-
-  int16_t  textWidth(std::string_view string, uint8_t font);     // Returns pixel width of string in specified font
-  int16_t  fontHeight(int16_t font);                             // Returns pixel height of string in specified font
-
-           // Used by library and Smooth font class to extract Unicode point codes from a UTF8 encoded string
-  uint16_t decodeUTF8(const uint8_t *buf, uint16_t *index, uint16_t remaining),
-           decodeUTF8(uint8_t c);
 
            // Used by Smooth font class to fetch a pixel colour for the anti-aliasing
   void     setCallback(getColorCallback getCol);
-
-  uint16_t fontsLoaded(void); // Each bit in returned value represents a font type that is loaded - used for debug/error handling only
 
   // Low level read/write
   void     spiwrite(uint8_t);        // legacy support only
@@ -674,7 +510,7 @@ class TFT_eSPI {
   //       id = 2: Turn on (a=true) or off (a=false) UTF8 decoding
   //       id = 3: Enable or disable use of ESP32 PSRAM (if available)
            #define CP437_SWITCH 1
-           #define UTF8_SWITCH  2
+//           #define UTF8_SWITCH  2
            #define PSRAM_ENABLE 3
   void     setAttribute(uint8_t id = 0, uint8_t a = 0); // Set attribute value
   uint8_t  getAttribute(uint8_t id = 0);                // Get attribute value
@@ -686,12 +522,7 @@ class TFT_eSPI {
   // Global variables
   static   SPIClass& getSPIinstance(void); // Get SPI class handle
 
-  uint8_t  textsize,  // Current font size multiplier
-           textdatum, // Text reference datum
-           rotation;  // Display rotation (0-3)
-
-  uint8_t  decoderState = 0;   // UTF8 decoder state        - not for user access
-  uint16_t decoderBuffer;      // Unicode code-point buffer - not for user access
+  uint8_t rotation;  // Display rotation (0-3)
 
  //--------------------------------------- private ------------------------------------//
  private:
@@ -775,19 +606,10 @@ class TFT_eSPI {
   bool     _vpDatum;
   bool     _vpOoB;
 
-  uint32_t fontsloaded;               // Bit field of fonts loaded
-
-  uint8_t  glyph_ab,   // Smooth font glyph delta Y (height) above baseline
-           glyph_bb;   // Smooth font glyph delta Y (height) below baseline
-
-  bool     isDigits;   // adjust bounding box for numbers to reduce visual jiggling
-  bool     textwrapX, textwrapY;  // If set, 'wrap' text at right and optionally bottom edge of display
-
   bool     _booted;    // init() or begin() has already run once
 
                        // User sketch manages these via set/getAttribute()
   bool     _cp437;        // If set, use correct CP437 charset (default is ON)
-  bool     _utf8;         // If set, use UTF-8 decoder in print stream 'write()' function (default ON)
   bool     _psram_enable; // Enable PSRAM use for library functions (TBD) and Sprites
 
   uint32_t _lastColor; // Buffered value of last colour used
@@ -797,10 +619,6 @@ class TFT_eSPI {
 #if defined (SSD1963_DRIVER)
   uint16_t Cswap;      // Swap buffer for SSD1963
   uint8_t r6, g6, b6;  // RGB buffer for SSD1963
-#endif
-
-#ifdef LOAD_GFXFF
-  GFXfont  *gfxFont;
 #endif
 
 /***************************************************************************************
@@ -832,9 +650,9 @@ class TFT_eSPI {
 **                         Section 10: Additional extension classes
 ***************************************************************************************/
 // Load the Button Class
-#include "Extensions/Button.h"
+//#include "Extensions/Button.h"
 
 // Load the Sprite Class
-#include "Extensions/Sprite.h"
+//#include "Extensions/Sprite.h"
 
 #endif // ends #ifndef _TFT_eSPIH_

@@ -13,6 +13,7 @@ set(dependencies
 
     cpputils
     espcpputils
+    esptftlib
 )
 
 idf_component_register(

@@ -318,45 +318,6 @@ menu "TFT_eSPI"
             default 1 if TFT_BACKLIGHT_ON_HIGH
             default 0 if TFT_BACKLIGHT_ON_LOW
     endmenu
-
-    menu "Fonts"
-        config TFT_LOAD_GLCD
-            bool "Font 1: Original Adafruit 8 pixel font needs ~1820 bytes in FLASH"
-            default "y"
-
-        config TFT_LOAD_FONT2
-            bool "Font 2: Small 16 pixel high font, needs ~3534 bytes in FLASH, 96 characters"
-            default "y"
-
-        config TFT_LOAD_FONT4
-            bool "Font 4: Medium 26 pixel high font, needs ~5848 bytes in FLASH, 96 characters"
-            default "y"
-
-        config TFT_LOAD_FONT6
-            bool "Font 6: Large 48 pixel font, needs ~2666 bytes in FLASH, only characters 1234567890:-.apm"
-            default "y"
-
-        config TFT_LOAD_FONT7
-            bool "Font 7: 7 segment 48 pixel font, needs ~2438 bytes in FLASH, only characters 1234567890:."
-            default "y"
-
-        config TFT_LOAD_FONT8
-            bool "Font 8: Large 75 pixel font needs ~3256 bytes in FLASH, only characters 1234567890:-."
-            default "y"
-
-        config TFT_LOAD_GFXFF
-            bool "FreeFonts: Include access to the 48 Adafruit_GFX free fonts FF1 to FF48 and custom fonts"
-            default "y"
-
-        config TFT_SMOOTH_FONT
-            bool "Smooth Fonts"
-            default "y"
-
-        config TFT_IS_AUTOBAHN
-            bool "TFT Use Autobahn font"
-            default "y"
-
-    endmenu
     
     menu "Touch screen configuration"
         config ENABLE_TOUCH
