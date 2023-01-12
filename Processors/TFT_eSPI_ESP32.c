@@ -183,11 +183,6 @@ void TFT_eSPI::pushPixels(const void* data_in, uint32_t len)
 {
   uint8_t *data = (uint8_t*)data_in;
 
-  if(_swapBytes) {
-      while ( len-- ) {tft_Write_16(*data); data++;}
-      return;
-  }
-
   while ( len >=64 ) {spi.writePattern(data, 64, 1); data += 64; len -= 64; }
   if (len) spi.writePattern(data, len, 1);
 }
@@ -283,93 +278,12 @@ void TFT_eSPI::pushBlock(uint16_t color, uint32_t len){
   //while (*_spi_cmd&SPI_USR);
 }
 //*/
-/***************************************************************************************
-** Function name:           pushSwapBytePixels - for ESP32
-** Description:             Write a sequence of pixels with swapped bytes
-***************************************************************************************/
-void TFT_eSPI::pushSwapBytePixels(const void* data_in, uint32_t len){
-
-  uint8_t* data = (uint8_t*)data_in;
-  uint32_t color[16];
-
-  if (len > 31)
-  {
-    WRITE_PERI_REG(SPI_MOSI_DLEN_REG(SPI_PORT), 511);
-    while(len>31)
-    {
-      uint32_t i = 0;
-      while(i<16)
-      {
-        color[i++] = DAT8TO32(data);
-        data+=4;
-      }
-      while (READ_PERI_REG(SPI_CMD_REG(SPI_PORT))&SPI_USR);
-      WRITE_PERI_REG(SPI_W0_REG(SPI_PORT),  color[0]);
-      WRITE_PERI_REG(SPI_W1_REG(SPI_PORT),  color[1]);
-      WRITE_PERI_REG(SPI_W2_REG(SPI_PORT),  color[2]);
-      WRITE_PERI_REG(SPI_W3_REG(SPI_PORT),  color[3]);
-      WRITE_PERI_REG(SPI_W4_REG(SPI_PORT),  color[4]);
-      WRITE_PERI_REG(SPI_W5_REG(SPI_PORT),  color[5]);
-      WRITE_PERI_REG(SPI_W6_REG(SPI_PORT),  color[6]);
-      WRITE_PERI_REG(SPI_W7_REG(SPI_PORT),  color[7]);
-      WRITE_PERI_REG(SPI_W8_REG(SPI_PORT),  color[8]);
-      WRITE_PERI_REG(SPI_W9_REG(SPI_PORT),  color[9]);
-      WRITE_PERI_REG(SPI_W10_REG(SPI_PORT), color[10]);
-      WRITE_PERI_REG(SPI_W11_REG(SPI_PORT), color[11]);
-      WRITE_PERI_REG(SPI_W12_REG(SPI_PORT), color[12]);
-      WRITE_PERI_REG(SPI_W13_REG(SPI_PORT), color[13]);
-      WRITE_PERI_REG(SPI_W14_REG(SPI_PORT), color[14]);
-      WRITE_PERI_REG(SPI_W15_REG(SPI_PORT), color[15]);
-      SET_PERI_REG_MASK(SPI_CMD_REG(SPI_PORT), SPI_USR);
-      len -= 32;
-    }
-  }
-
-  if (len > 15)
-  {
-    uint32_t i = 0;
-    while(i<8)
-    {
-      color[i++] = DAT8TO32(data);
-      data+=4;
-    }
-    while (READ_PERI_REG(SPI_CMD_REG(SPI_PORT))&SPI_USR);
-    WRITE_PERI_REG(SPI_MOSI_DLEN_REG(SPI_PORT), 255);
-    WRITE_PERI_REG(SPI_W0_REG(SPI_PORT),  color[0]);
-    WRITE_PERI_REG(SPI_W1_REG(SPI_PORT),  color[1]);
-    WRITE_PERI_REG(SPI_W2_REG(SPI_PORT),  color[2]);
-    WRITE_PERI_REG(SPI_W3_REG(SPI_PORT),  color[3]);
-    WRITE_PERI_REG(SPI_W4_REG(SPI_PORT),  color[4]);
-    WRITE_PERI_REG(SPI_W5_REG(SPI_PORT),  color[5]);
-    WRITE_PERI_REG(SPI_W6_REG(SPI_PORT),  color[6]);
-    WRITE_PERI_REG(SPI_W7_REG(SPI_PORT),  color[7]);
-    SET_PERI_REG_MASK(SPI_CMD_REG(SPI_PORT), SPI_USR);
-    len -= 16;
-  }
-
-  if (len)
-  {
-    while (READ_PERI_REG(SPI_CMD_REG(SPI_PORT))&SPI_USR);
-    WRITE_PERI_REG(SPI_MOSI_DLEN_REG(SPI_PORT), (len << 4) - 1);
-    for (uint32_t i=0; i <= (len<<1); i+=4) {
-      WRITE_PERI_REG(SPI_W0_REG(SPI_PORT)+i, DAT8TO32(data)); data+=4;
-    }
-    SET_PERI_REG_MASK(SPI_CMD_REG(SPI_PORT), SPI_USR);
-  }
-  while (READ_PERI_REG(SPI_CMD_REG(SPI_PORT))&SPI_USR);
-
-}
 
 /***************************************************************************************
 ** Function name:           pushPixels - for ESP32
 ** Description:             Write a sequence of pixels
 ***************************************************************************************/
 void TFT_eSPI::pushPixels(const void* data_in, uint32_t len){
-
-  if(_swapBytes) {
-    pushSwapBytePixels(data_in, len);
-    return;
-  }
 
   uint32_t *data = (uint32_t*)data_in;
 
@@ -496,17 +410,6 @@ void TFT_eSPI::pushPixels(const void* data_in, uint32_t len){
   else { while ( len-- ) {tft_Write_16(*data); data++;} }
 }
 
-/***************************************************************************************
-** Function name:           pushSwapBytePixels - for ESP32 and 3 byte RGB display
-** Description:             Write a sequence of pixels with swapped bytes
-***************************************************************************************/
-void TFT_eSPI::pushSwapBytePixels(const void* data_in, uint32_t len){
-
-  uint16_t *data = (uint16_t*)data_in;
-  // ILI9488 write macro is not endianess dependant, so swap byte macro not used here
-  while ( len-- ) {tft_Write_16(*data); data++;}
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////
 #elif defined (TFT_PARALLEL_8_BIT) // Now the code for ESP32 8 bit parallel
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -534,16 +437,6 @@ void TFT_eSPI::pushBlock(uint16_t color, uint32_t len){
   #endif
   }
   else while (len--) {tft_Write_16(color);}
-}
-
-/***************************************************************************************
-** Function name:           pushSwapBytePixels - for ESP32 and parallel display
-** Description:             Write a sequence of pixels with swapped bytes
-***************************************************************************************/
-void TFT_eSPI::pushSwapBytePixels(const void* data_in, uint32_t len){
-
-  uint16_t *data = (uint16_t*)data_in;
-  while ( len-- ) {tft_Write_16(*data); data++;}
 }
 
 /***************************************************************************************
@@ -617,10 +510,6 @@ void TFT_eSPI::pushPixelsDMA(uint16_t* image, uint32_t len)
   if ((len == 0) || (!DMA_Enabled)) return;
 
   dmaWait();
-
-  if(_swapBytes) {
-    for (uint32_t i = 0; i < len; i++) (image[i] = image[i] << 8 | image[i] >> 8);
-  }
 
   esp_err_t ret;
   static spi_transaction_t trans;
@@ -702,28 +591,13 @@ void TFT_eSPI::pushImageDMA(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t
 
   // If image is clipped, copy pixels into a contiguous block
   if ( (dw != w) || (dh != h) ) {
-    if(_swapBytes) {
-      for (int32_t yb = 0; yb < dh; yb++) {
-        for (int32_t xb = 0; xb < dw; xb++) {
-          uint32_t src = xb + dx + w * (yb + dy);
-          (buffer[xb + yb * dw] = image[src] << 8 | image[src] >> 8);
-        }
-      }
-    }
-    else {
-      for (int32_t yb = 0; yb < dh; yb++) {
-        memcpy((uint8_t*) (buffer + yb * dw), (uint8_t*) (image + dx + w * (yb + dy)), dw << 1);
-      }
+    for (int32_t yb = 0; yb < dh; yb++) {
+      memcpy((uint8_t*) (buffer + yb * dw), (uint8_t*) (image + dx + w * (yb + dy)), dw << 1);
     }
   }
   // else, if a buffer pointer has been provided copy whole image to the buffer
-  else if (buffer != image || _swapBytes) {
-    if(_swapBytes) {
-      for (uint32_t i = 0; i < len; i++) (buffer[i] = image[i] << 8 | image[i] >> 8);
-    }
-    else {
-      memcpy(buffer, image, len*2);
-    }
+  else if (buffer != image) {
+    memcpy(buffer, image, len*2);
   }
 
   if (spiBusyCheck) dmaWait(); // In case we did not wait earlier

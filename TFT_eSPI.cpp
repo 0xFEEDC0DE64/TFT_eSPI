@@ -477,8 +477,6 @@ TFT_eSPI::TFT_eSPI(int16_t w, int16_t h)
   textdatum = TL_DATUM; // Top Left text alignment is default
   fontsloaded = 0;
 
-  _swapBytes = false;   // Do not swap colour bytes by default
-
   locked = true;           // Transaction mutex lock flag to ensure begin/endTranaction pairing
   inTransaction = false;   // Flag to prevent multiple sequential functions to keep bus access open
   lockTransaction = false; // start/endWrite lock flag to allow sketch to keep SPI bus access open
@@ -1360,9 +1358,7 @@ void TFT_eSPI::readRect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t *da
 ***************************************************************************************/
 void TFT_eSPI::pushRect(int32_t x, int32_t y, int32_t w, int32_t h, uint16_t *data)
 {
-  bool swap = _swapBytes; _swapBytes = false;
   pushImage(x, y, w, h, data);
-  _swapBytes = swap;
 }
 
 
@@ -1412,9 +1408,6 @@ void TFT_eSPI::pushImage(int32_t x, int32_t y, int32_t w, int32_t h, const uint1
 
   uint16_t  lineBuf[dw]; // Use buffer to minimise setWindow call count
 
-  // The little endian transp color must be byte swapped if the image is big endian
-  if (!_swapBytes) transp = transp >> 8 | transp << 8;
-
   while (dh--)
   {
     int32_t len = dw;
@@ -1452,26 +1445,6 @@ void TFT_eSPI::pushImage(int32_t x, int32_t y, int32_t w, int32_t h, const uint1
 
   inTransaction = lockTransaction;
   end_tft_write();
-}
-
-
-/***************************************************************************************
-** Function name:           setSwapBytes
-** Description:             Used by 16 bit pushImage() to swap byte order in colours
-***************************************************************************************/
-void TFT_eSPI::setSwapBytes(bool swap)
-{
-  _swapBytes = swap;
-}
-
-
-/***************************************************************************************
-** Function name:           getSwapBytes
-** Description:             Return the swap byte order for colours
-***************************************************************************************/
-bool TFT_eSPI::getSwapBytes(void)
-{
-  return _swapBytes;
 }
 
 
@@ -3044,14 +3017,12 @@ void TFT_eSPI::pushColors(uint8_t *data, uint32_t len)
 ** Function name:           pushColors
 ** Description:             push an array of pixels, for image drawing
 ***************************************************************************************/
-void TFT_eSPI::pushColors(uint16_t *data, uint32_t len, bool swap)
+void TFT_eSPI::pushColors(uint16_t *data, uint32_t len)
 {
   begin_tft_write();
-  if (swap) {swap = _swapBytes; _swapBytes = true; }
 
   pushPixels(data, len);
 
-  _swapBytes = swap; // Restore old value
   end_tft_write();
 }
 

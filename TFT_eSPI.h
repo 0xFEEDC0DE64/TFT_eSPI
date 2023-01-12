@@ -455,7 +455,7 @@ class TFT_eSPI {
 
            // Push (aka write pixel) colours to the TFT (use setAddrWindow() first)
   void     pushColor(uint16_t color, uint32_t len),  // Deprecated, use pushBlock()
-           pushColors(uint16_t  *data, uint32_t len, bool swap = true), // With byte swap option
+           pushColors(uint16_t  *data, uint32_t len), // With byte swap option
            pushColors(uint8_t  *data, uint32_t len); // Deprecated, use pushPixels()
 
            // Write a solid block of a single colour
@@ -518,11 +518,6 @@ class TFT_eSPI {
            //                 Corner 1               Corner 2               Corner 3
   void     drawTriangle(int32_t x1,int32_t y1, int32_t x2,int32_t y2, int32_t x3,int32_t y3, uint32_t color);
   void     fillTriangle(int32_t x1,int32_t y1, int32_t x2,int32_t y2, int32_t x3,int32_t y3, uint32_t color);
-
-  // Image rendering
-           // Swap the byte order for pushImage() and pushPixels() - corrects endianness
-  void     setSwapBytes(bool swap);
-  bool     getSwapBytes(void);
 
            // Draw bitmap
   void     drawBitmap( int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, int16_t h, uint16_t fgcolor),
@@ -721,9 +716,6 @@ class TFT_eSPI {
            // Initialise the data bus GPIO and hardware interfaces
   void     initBus(void);
 
-           // Temporary  library development function  TODO: remove need for this
-  void     pushSwapBytePixels(const void* data_in, uint32_t len);
-
            // Same as setAddrWindow but exits with CGRAM in read mode
   void     readAddrWindow(int32_t xs, int32_t ys, int32_t w, int32_t h);
 
@@ -790,7 +782,6 @@ class TFT_eSPI {
 
   bool     isDigits;   // adjust bounding box for numbers to reduce visual jiggling
   bool     textwrapX, textwrapY;  // If set, 'wrap' text at right and optionally bottom edge of display
-  bool     _swapBytes; // Swap the byte order for TFT pushImage()
 
   bool     _booted;    // init() or begin() has already run once
 
