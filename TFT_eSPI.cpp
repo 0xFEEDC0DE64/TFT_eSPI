@@ -42,7 +42,7 @@
 #endif
 
 #include "freertos/task.h"
-#include "wiring_shift.h"
+#include "esp32-hal-spi.h"
 #include "esp32-hal-gpio.h"
 #include "esp32-hal-misc.h"
 
@@ -91,7 +91,7 @@ inline void TFT_eSPI::begin_tft_write(void){
   if (locked) {
     locked = false; // Flag to show SPI access now unlocked
 #if defined (SPI_HAS_TRANSACTION) && defined (SUPPORT_TRANSACTIONS) && !defined(TFT_PARALLEL_8_BIT) && !defined(RP2040_PIO_INTERFACE)
-    spi.beginTransaction(SPISettings(SPI_FREQUENCY, MSBFIRST, TFT_SPI_MODE));
+    spi.beginTransaction(SPISettings(SPI_FREQUENCY, SPI_MSBFIRST, TFT_SPI_MODE));
 #endif
     CS_L;
     SET_BUS_WRITE_MODE;  // Some processors (e.g. ESP32) allow recycling the tx buffer when rx is not used
@@ -103,7 +103,7 @@ void TFT_eSPI::begin_nin_write(void){
   if (locked) {
     locked = false; // Flag to show SPI access now unlocked
 #if defined (SPI_HAS_TRANSACTION) && defined (SUPPORT_TRANSACTIONS) && !defined(TFT_PARALLEL_8_BIT) && !defined(RP2040_PIO_INTERFACE)
-    spi.beginTransaction(SPISettings(SPI_FREQUENCY, MSBFIRST, TFT_SPI_MODE));
+    spi.beginTransaction(SPISettings(SPI_FREQUENCY, SPI_MSBFIRST, TFT_SPI_MODE));
 #endif
     CS_L;
     SET_BUS_WRITE_MODE;  // Some processors (e.g. ESP32) allow recycling the tx buffer when rx is not used
@@ -155,7 +155,7 @@ inline void TFT_eSPI::begin_tft_read(void){
 #if defined (SPI_HAS_TRANSACTION) && defined (SUPPORT_TRANSACTIONS) && !defined(TFT_PARALLEL_8_BIT) && !defined(RP2040_PIO_INTERFACE)
   if (locked) {
     locked = false;
-    spi.beginTransaction(SPISettings(SPI_READ_FREQUENCY, MSBFIRST, TFT_SPI_MODE));
+    spi.beginTransaction(SPISettings(SPI_READ_FREQUENCY, SPI_MSBFIRST, TFT_SPI_MODE));
     CS_L;
   }
 #else
