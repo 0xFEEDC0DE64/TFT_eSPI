@@ -346,6 +346,12 @@ class TFT_eSPI : public espgui::TftInterface {
            // If bg_color is not included the background pixel colour will be read from TFT or sprite
   uint16_t drawPixel(int32_t x, int32_t y, uint32_t color, uint8_t alpha, uint32_t bg_color = 0x00FFFFFF);
 
+
+  // As per "drawSmoothArc" except the ends of the arc are NOT anti-aliased, this facilitates dynamic arc length changes with
+  // arc segments and ensures clean segment joints.
+  // The sides of the arc are anti-aliased by default. If smoothArc is false sides will NOT be anti-aliased
+  void     drawArc(int32_t x, int32_t y, int32_t r, int32_t ir, uint32_t startAngle, uint32_t endAngle, uint32_t fg_color, uint32_t bg_color, bool smoothArc = true);
+
            // Draw a small anti-aliased filled circle at ax,ay with radius r (uses drawWideLine)
            // If bg_color is not included the background pixel colour will be read from TFT or sprite
   void     drawSpot(float ax, float ay, float r, uint32_t fg_color, uint32_t bg_color = 0x00FFFFFF);
@@ -559,6 +565,9 @@ class TFT_eSPI : public espgui::TftInterface {
            // Single GPIO input/output direction control
   void     gpioMode(uint8_t gpio, uint8_t mode);
 
+           // Smooth graphics helper
+  uint8_t  sqrt_fraction(uint32_t num);
+
            // Helper function: calculate distance of a point from a finite length line between two points
   float    wedgeLineDistance(float pax, float pay, float bax, float bay, float dr);
 
@@ -645,6 +654,24 @@ class TFT_eSPI : public espgui::TftInterface {
 #endif
 
 }; // End of class TFT_eSPI
+
+// Swap any type
+template <typename T> static inline void
+transpose(T& a, T& b) { T t = a; a = b; b = t; }
+
+// Fast alphaBlend
+template <typename A, typename F, typename B> static inline uint16_t
+fastBlend(A alpha, F fgc, B bgc)
+{
+    // Split out and blend 5-bit red and blue channels
+    uint32_t rxb = bgc & 0xF81F;
+    rxb += ((fgc & 0xF81F) - rxb) * (alpha >> 2) >> 6;
+    // Split out and blend 6-bit green channel
+    uint32_t xgx = bgc & 0x07E0;
+    xgx += ((fgc & 0x07E0) - xgx) * alpha >> 8;
+    // Recombine channels
+    return (rxb & 0xF81F) | (xgx & 0x07E0);
+}
 
 /***************************************************************************************
 **                         Section 10: Additional extension classes
