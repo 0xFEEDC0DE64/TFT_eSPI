@@ -43,7 +43,6 @@
 
 #include "freertos/task.h"
 #include "esp32-hal-spi.h"
-#include "esp32-hal-gpio.h"
 #include "esp32-hal-misc.h"
 
 namespace {
